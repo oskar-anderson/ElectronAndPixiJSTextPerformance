@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixiTextTest</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/6.3.2/browser/pixi.js"></script>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div class="canvas-container" tabindex="0"></div>
+    <p>
+        <a href="./index.html">Index</a>
+    </p>
+</body>
+
+
+<script>
+
+const height = 40;
+const width = 100;
+const chars = "ABCDEFGHIJKLMNOPQRSTUVWabcdefghijklmnopqrstuvw";
+let frameCount = 0;
+let prevTime = Date.now();
+let deltaTimes = [];
+
+function GenerateBoard() {
+    let resultArr = [];
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            rng = Math.random();
+            let char = chars[Math.floor(rng * chars.length)];
+            resultArr.push(char);
+        }
+    }
+    return resultArr;
+}
+
+let app = null;
+
+async function initPixi () {
+    app = new PIXI.Application(
+        {
+            width: 960,
+            height: 720,
+            backgroundColor: 0xAAAAAA
+        }
+    );
+    // The application will create a canvas element for you that you
+    // can then insert into the DOM
+    document.querySelector('.canvas-container').appendChild(app.view);
+    
+    app.loader.add('./font/ps2p.fnt'); //  bitmap - quite fast
+    // app.loader.add('./font/PressStart2P/PressStart2P.ttf'); // regular - very slow
+    
+    return new Promise((resolve, reject) => {
+        console.log("app.loader loading...");
+        app.loader.load();
+        
+        app.loader.onComplete.add(() => {
+            console.log("app.loader resolve");
+            resolve();
+        })
+        app.loader.onError.add(() => {
+            console.log("app.loader onError");
+            reject();
+        })
+    });
+}
+
+function pixiMain(drawArea, isFirstRun) {
+    // The application will create a renderer using WebGL, if possible,
+    // with a fallback to a canvas render.
+
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            let tile = drawArea[y * width + x];
+            if (! isFirstRun) {
+                if (y === height - 1) {
+                    let fps = 1 / (deltaTimes.reduce((a,b) => (a+b), 0) / deltaTimes.length / 1000);
+                    let str = "Frames: " + frameCount + ", FPS: " + fps;
+                    tile = str.length > x ? str[x] : " ";    
+                }
+                app.stage.children[y * width + x].text = tile;
+                // app.stage.children[y * width + x].tint = rgbToHex(tile.ColorRGBr, tile.ColorRGBg, tile.ColorRGBb);
+            } else {
+                let scale = 1;
+                let fontSize = 8;
+                let textChar
+                if (true) {
+
+                    textChar = new PIXI.BitmapText(tile, {
+                        fontName: "Press Start 2P",
+                        fontSize: fontSize,
+                        align: "right"
+                    });
+                    // textChar.tint = rgbToHex(tile.ColorRGBr, tile.ColorRGBg, tile.ColorRGBb);
+                } else {
+                
+                    textChar = new PIXI.Text(tile);
+                    textChar.style = new PIXI.TextStyle(
+                        {
+                            fill: 0x008000,
+                            fontSize: fontSize,
+                            fontFamily: "Press Start 2P"
+                        }
+                    )
+                }
+                
+                
+                textChar.x = x * fontSize * scale;
+                textChar.y = y * fontSize * scale;
+                
+                textChar.scale.x = scale;
+                textChar.scale.y = scale;
+                app.stage.addChild(textChar);
+            }
+        }
+    }
+}
+
+async function main() {
+    await initPixi();
+    pixiMain(GenerateBoard(), frameCount === 0)
+    let canvas = document.querySelector('.canvas-container');
+    canvas.focus();
+    canvas.addEventListener('keydown', (e) => {
+        frameCount++;
+        deltaTimes.push(Date.now() - prevTime);
+        deltaTimes = deltaTimes.slice(-100);
+        prevTime = Date.now();
+        pixiMain(GenerateBoard(), frameCount === 0);
+    })
+}
+
+main();
+
+async function handleButton() {
+    while (true) {
+        document.querySelector('.canvas-container').dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
+        await new Promise(r => setTimeout(r, 1));
+    }
+}
+handleButton();
+
+</script>
+</html>

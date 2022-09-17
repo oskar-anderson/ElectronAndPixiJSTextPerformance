@@ -1,0 +1,19 @@
+{
+  "name": "ElectronTest",
+  "version": "1.0.0",
+  "description": "Electron text performance test",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "package-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --prune=true --out=release-builds",
+    "package-win": "electron-packager . TextPerformanceTest --overwrite --asar=true --platform=win32 --arch=ia32 --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"TextPerformanceTest\"",
+    "package-linux": "electron-packager . TextPerformanceTest --overwrite --asar=true --platform=linux --arch=x64 --prune=true --out=release-builds"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^20.1.4",
+    "electron-packager": "^15.5.1"
+  }
+}

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DomTextTest</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div class="PressStart2PFont" id="drawArea" style="user-select: none; line-height: 8px; outline: none;" tabindex="0"></div>
+
+    <p>
+        <a href="./index.html">Index</a>
+    </p>
+
+    <script>
+        const ul = document.querySelector('ul');
+        const height = 40;
+        const width = 100;
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWabcdefghijklmnopqrstuvw";
+        let frameCount = 0;
+        let prevTime = Date.now();
+        let deltaTimes = [];
+
+        function GenerateBoard() {
+            let resultArr = [];
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    rng = Math.random();
+                    let char = chars[Math.floor(rng * chars.length)];
+                    resultArr.push(char);
+                }
+            }
+            return resultArr;
+        }
+
+        function InitBoard() {
+            let drawArea = document.querySelector('#drawArea');
+
+            let sb = "";
+            for (let y = 0; y < height; y++) {
+                sb += '<div>';
+                for (let x = 0; x < width; x++) {
+                    sb += '<span></span>';
+                }
+                sb += '</div>';
+            }
+            drawArea.innerHTML = sb;
+            prevTime = Date.now();
+        }
+
+        function SetBoard() {
+            let newBoard = GenerateBoard();
+            let drawArea = document.querySelector('#drawArea');
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    if (y === height - 1) {
+                        let fps = 1 / (deltaTimes.reduce((a,b) => (a+b), 0) / deltaTimes.length / 1000);
+                        let str = "Frames: " + frameCount + ", FPS: " + fps;
+                        drawArea.children[y].children[x].innerHTML = str.length > x ? str[x] : " ";
+                    } else {
+                        drawArea.children[y].children[x].innerHTML = newBoard[y * width + x];
+                    }
+                }
+            }
+        }
+
+        function HandleEvents() {
+            let drawArea = document.querySelector('#drawArea');
+            drawArea.focus();
+            drawArea.addEventListener('keydown', (e) => {
+                frameCount++;
+                deltaTimes.push(Date.now() - prevTime);
+                deltaTimes = deltaTimes.slice(-100);
+                prevTime = Date.now();
+                SetBoard();
+                
+            });
+        }
+
+        HandleEvents();
+        InitBoard();
+        SetBoard();
+
+
+        async function handleButton() {
+            while (true) {
+                document.querySelector('#drawArea').dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
+                await new Promise(r => setTimeout(r, 1));
+            }
+        }
+        handleButton();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+
+@font-face
+{
+    font-family: PressStart2PFont;
+    src:url("./font/PressStart2P/PressStart2P.ttf");
+}
+
+.PressStart2PFont {
+    font-family: PressStart2PFont, cursive;
+    font-size: 8px;
+}
+
+.canvas-container:focus { 
+    outline: none; 
+}
