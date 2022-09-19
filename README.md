@@ -23,7 +23,9 @@ Desktop (Electron):
 npm install
 npm run start
 ```
-HTML - just open index.html in the browser
+HTML:
+1. create localserver
+2. open `index.html`
 
 
 ### Other
